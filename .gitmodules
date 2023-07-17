@@ -1,0 +1,3 @@
+[submodule "src/submodules/utils"]
+	path = src/submodules/utils
+	url = git@github.com:lisper-inmove/PythonUtils.git
