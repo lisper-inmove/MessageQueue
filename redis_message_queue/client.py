@@ -1,8 +1,5 @@
 import redis
 from redis import StrictRedis
-from submodules.utils.logger import Logger
-
-logger = Logger()
 
 
 class Client:
@@ -31,7 +28,6 @@ class Client:
             raise ex
 
     def xread(self, count, last_id, block):
-        logger.info(f"{self.stream_name} xread: {count} {last_id} {block}")
         messages = self.client.xread(
             streams={self.stream_name: last_id},
             count=count,
@@ -43,7 +39,6 @@ class Client:
         return messages
 
     def xgroupread(self, group_name, consumer_name, last_id, count, block):
-        logger.info(f"{self.stream_name} xgroupread: {group_name} {consumer_name} {last_id} {count} {block}")
         messages = self.client.xreadgroup(
             groupname=group_name,
             consumername=consumer_name,
@@ -56,7 +51,6 @@ class Client:
         return messages
 
     def xadd(self, data):
-        logger.info(f"{self.stream_name} xadd: {data} {self.maxlen}")
         result = self.client.xadd(
             self.stream_name,
             data,
@@ -66,26 +60,21 @@ class Client:
         return result
 
     def xdel(self, id):
-        logger.info(f"{self.stream_name} xdel: {id}")
         self.client.xdel(self.stream_name, id)
 
     def xack(self, group_name, id):
-        logger.info(f"{self.stream_name} xack: {group_name} {id}")
         return self.client.xack(self.stream_name, group_name, id)
 
     def xpending(self, group_name):
-        logger.info(f"{self.stream_name} xpending: {group_name}")
         return self.client.xpending(self.stream_name, group_name)
 
     def xpending_range(self, group_name, min_id, max_id, count, consumer_name=None, idle=None):
         if idle is None:
             idle = 10 * 1000
-        logger.info(f"{self.stream_name} xpending_range: {group_name}")
         return self.client.xpending_range(
             self.stream_name, group_name, min_id, max_id, count, consumer_name, idle)
 
     def claim(self, group_name, consumer_name, min_idle_time, message_ids):
-        logger.info(f"{self.stream_name} claim: {group_name} {consumer_name} {min_idle_time} {message_ids}")
         return self.client.xclaim(self.stream_name, group_name, consumer_name, min_idle_time, message_ids)
 
     def autoclaim(self, group_name, consumer_name, min_idle_time, count, start_id=None):
@@ -98,7 +87,6 @@ class Client:
         """
         if start_id is None:
             start_id = "0-0"
-        logger.info(f"{self.stream_name} autoclaim: {group_name} {consumer_name} {min_idle_time} {count}")
         messages = self.client.xautoclaim(
             self.stream_name,
             group_name,

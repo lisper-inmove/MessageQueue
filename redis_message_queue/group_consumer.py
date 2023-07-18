@@ -1,8 +1,3 @@
-from submodules.utils.logger import Logger
-
-logger = Logger()
-
-
 class GroupConsumer:
 
     def __init__(self, client, group_name, consumer_name,
