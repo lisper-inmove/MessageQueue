@@ -1,4 +1,4 @@
-from msg_config import MsgConfig
+from .msg_config import MsgConfig
 
 
 class Producer:
@@ -11,8 +11,8 @@ class Producer:
         if config.type != MsgConfig.REDIS:
             return
         import redis
-        from redis_message_queue.producer import Producer
-        from redis_message_queue.client import Client
+        from .redis_message_queue.producer import Producer
+        from .redis_message_queue.client import Client
 
         client = Client(
             client=redis.StrictRedis(host=config.host, port=config.port),

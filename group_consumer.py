@@ -1,4 +1,4 @@
-from msg_config import MsgConfig
+from .msg_config import MsgConfig
 
 
 class GroupConsumer:
@@ -11,8 +11,8 @@ class GroupConsumer:
         if config.type != MsgConfig.REDIS:
             return
         import redis
-        from redis_message_queue.group_consumer import GroupConsumer
-        from redis_message_queue.client import Client
+        from .redis_message_queue.group_consumer import GroupConsumer
+        from .redis_message_queue.client import Client
 
         client = Client(
             client=redis.StrictRedis(host=config.host, port=config.port),
