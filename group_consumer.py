@@ -18,4 +18,10 @@ class GroupConsumer:
             client=redis.StrictRedis(host=config.host, port=config.port),
             stream_name=config.stream_name
         )
-        self.producer = GroupConsumer(client, config.group_name, config.consumer_name)
+        self.producer = GroupConsumer(
+            client,
+            config.group_name,
+            config.consumer_name,
+            block=config.block,
+            frow_now_on=config.frow_now_on
+        )

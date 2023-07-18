@@ -18,4 +18,8 @@ class Consumer:
             client=redis.StrictRedis(host=config.host, port=config.port),
             stream_name=config.stream_name
         )
-        self.producer = Consumer(client, from_now_on=config.from_now_on, block=config.block)
+        self.producer = Consumer(
+            client,
+            from_now_on=config.from_now_on,
+            block=config.block
+        )

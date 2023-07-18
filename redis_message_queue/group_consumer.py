@@ -1,7 +1,7 @@
 class GroupConsumer:
 
     def __init__(self, client, group_name, consumer_name,
-                 block=None, from_now_on=None):
+                 frow_now_on=None, block=None):
         self.client = client
         self.group_name = group_name
         self.consumer_name = consumer_name
