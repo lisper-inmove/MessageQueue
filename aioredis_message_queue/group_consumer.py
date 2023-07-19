@@ -11,7 +11,6 @@ class GroupConsumer:
         self.from_now_on = from_now_on
         if self.from_now_on is None:
             self.from_now_on = True
-        self.client.xgroup_create(group_name)
         self.__set_last_id()
 
     def __set_last_id(self):
@@ -19,40 +18,44 @@ class GroupConsumer:
         if self.from_now_on:
             self.last_id = ">"
 
-    def pull(self, count):
-        messages = self.client.xgroupread(
+    async def create_group(self):
+        await self.client.xgroup_create(self.group_name)
+
+    async def pull(self, count):
+        async for message in self.client.xgroupread(
             self.group_name,
             self.consumer_name,
             self.last_id,
             count,
             self.block
-        )
-        if len(messages) > 0:
-            self.last_id = messages[-1][0]
-        return messages
+        ):
+            yield message
 
-    def pendings(self):
+    async def pendings(self):
         """当前已经被consumer读取了，但是没有ack的消息"""
-        return self.client.xpending(self.group_name)
+        return await self.client.xpending(self.group_name)
 
-    def pending_range(self, count=None, consumer_name=None):
+    async def pending_range(self, count=None, consumer_name=None):
         if count is None:
             count = 10
         if consumer_name is None:
             consumer_name = self.consumer_name
-        pending_info = self.pendings()
+        pending_info = await self.pendings()
         if pending_info.get("pending") == 0:
-            return []
+            return
         min_id = pending_info.get("min").decode()
         max_id = pending_info.get("max").decode()
-        return self.client.xpending_range(self.group_name, min_id, max_id, count, consumer_name)
+        async for message in self.client.xpending_range(
+                self.group_name, min_id, max_id, count, consumer_name
+        ):
+            yield message
 
-    def claim(self, message_ids, min_idle_time=None):
+    async def claim(self, message_ids, min_idle_time=None):
         if min_idle_time is None:
             min_idle_time = 10 * 1000
-        return self.client.claim(self.group_name, self.consumer_name, min_idle_time, message_ids)
+        return await self.client.claim(self.group_name, self.consumer_name, min_idle_time, message_ids)
 
-    def autoclaim(self, min_idle_time=None, count=None):
+    async def autoclaim(self, min_idle_time=None, count=None):
         """
         将组中,已经pending了min_idle_time的消息声明到自己名下.
 
@@ -63,7 +66,7 @@ class GroupConsumer:
             min_idle_time = 10 * 1000
         if count is None:
             count = 10
-        return self.client.autoclaim(self.group_name, self.consumer_name, min_idle_time, count)
+        return await self.client.autoclaim(self.group_name, self.consumer_name, min_idle_time, count)
 
-    def ack(self, id):
-        self.client.xack(self.group_name, id)
+    async def ack(self, id):
+        await self.client.xack(self.group_name, id)
