@@ -34,7 +34,7 @@ class Client:
         )
         if len(messages) == 0:
             return
-        for message in messages[0]:
+        for message in messages[0][1]:
             yield message
 
     async def xgroupread(self, group_name, consumer_name, last_id, count, block):
@@ -47,7 +47,7 @@ class Client:
         )
         if len(messages) == 0:
             return
-        for message in messages[0]:
+        for message in messages[0][1]:
             yield message
 
     async def xadd(self, data):
