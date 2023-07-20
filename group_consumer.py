@@ -12,16 +12,16 @@ class GroupConsumer:
             return
         if config.isAsync:
             from redis import asyncio as aioredis
-            from .aioredis_message_queue.group_consumer import GroupConsumer
-            from .aioredis_message_queue.client import Client
+            from .aioredis_mq.group_consumer import GroupConsumer
+            from .aioredis_mq.client import Client
             client = Client(
                 client=aioredis.StrictRedis(host=config.host, port=config.port),
                 stream_name=config.stream_name
             )
         else:
             import redis
-            from .redis_message_queue.group_consumer import GroupConsumer
-            from .redis_message_queue.client import Client
+            from .redis_mq.group_consumer import GroupConsumer
+            from .redis_mq.client import Client
             client = Client(
                 client=redis.StrictRedis(host=config.host, port=config.port),
                 stream_name=config.stream_name

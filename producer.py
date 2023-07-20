@@ -12,16 +12,16 @@ class Producer:
             return
         if config.isAsync:
             from redis import asyncio as aioredis
-            from .aioredis_message_queue.producer import Producer
-            from .aioredis_message_queue.client import Client
+            from .aioredis_mq.producer import Producer
+            from .aioredis_mq.client import Client
             client = Client(
                 client=aioredis.StrictRedis(host=config.host, port=config.port),
                 stream_name=config.stream_name
             )
         else:
             import redis
-            from .redis_message_queue.producer import Producer
-            from .redis_message_queue.client import Client
+            from .redis_mq.producer import Producer
+            from .redis_mq.client import Client
             client = Client(
                 client=redis.StrictRedis(host=config.host, port=config.port),
                 stream_name=config.stream_name
