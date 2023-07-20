@@ -3,22 +3,22 @@ import redis
 
 class Client:
 
-    def __init__(self, client, stream_name, maxlen=None):
+    def __init__(self, client, streamName, maxlen=None):
         if maxlen is None:
             maxlen = 1000
         self.maxlen = maxlen
         self.client = client
         # 默认只获取最新数据
-        self.from_now_on = True
-        self.stream_name = stream_name
+        self.fromNowOn = True
+        self.streamName = streamName
 
-    async def xgroup_create(self, group_name, mkstream=None):
+    async def xgroup_create(self, groupName, mkstream=None):
         if mkstream is None:
             mkstream = True
         try:
             await self.client.xgroup_create(
-                self.stream_name,
-                group_name,
+                self.streamName,
+                groupName,
                 mkstream=mkstream
             )
         except redis.exceptions.ResponseError as ex:
@@ -26,9 +26,9 @@ class Client:
                 return
             raise ex
 
-    async def xread(self, count, last_id, block):
+    async def xread(self, count, lastId, block):
         messages = await self.client.xread(
-            streams={self.stream_name: last_id},
+            streams={self.streamName: lastId},
             count=count,
             block=block
         )
@@ -37,11 +37,11 @@ class Client:
         for message in messages[0][1]:
             yield message
 
-    async def xgroupread(self, group_name, consumer_name, last_id, count, block):
+    async def xgroupread(self, groupName, consumerName, lastId, count, block):
         messages = await self.client.xreadgroup(
-            groupname=group_name,
-            consumername=consumer_name,
-            streams={self.stream_name: last_id},
+            groupname=groupName,
+            consumername=consumerName,
+            streams={self.streamName: lastId},
             count=count,
             block=block
         )
@@ -52,46 +52,46 @@ class Client:
 
     async def xadd(self, data):
         return await self.client.xadd(
-            self.stream_name,
+            self.streamName,
             data,
             maxlen=self.maxlen,
             approximate=True
         )
 
     async def xdel(self, id):
-        await self.client.xdel(self.stream_name, id)
+        await self.client.xdel(self.streamName, id)
 
-    async def xack(self, group_name, id):
-        return await self.client.xack(self.stream_name, group_name, id)
+    async def xack(self, groupName, id):
+        return await self.client.xack(self.streamName, groupName, id)
 
-    async def xpending(self, group_name):
-        return await self.client.xpending(self.stream_name, group_name)
+    async def xpending(self, groupName):
+        return await self.client.xpending(self.streamName, groupName)
 
-    async def xpending_range(self, group_name, min_id, max_id, count, consumer_name=None, idle=None):
+    async def xpending_range(self, groupName, min_id, max_id, count, consumerName=None, idle=None):
         if idle is None:
             idle = 10 * 1000
         messages = await self.client.xpending_range(
-            self.stream_name,
-            group_name,
+            self.streamName,
+            groupName,
             min_id,
             max_id,
             count,
-            consumer_name,
+            consumerName,
             idle
         )
         for message in messages:
             yield message
 
-    async def claim(self, group_name, consumer_name, min_idle_time, message_ids):
+    async def claim(self, groupName, consumerName, min_idle_time, message_ids):
         return await self.client.xclaim(
-            self.stream_name,
-            group_name,
-            consumer_name,
+            self.streamName,
+            groupName,
+            consumerName,
             min_idle_time,
             message_ids
         )
 
-    async def autoclaim(self, group_name, consumer_name, min_idle_time, count, start_id=None):
+    async def autoclaim(self, groupName, consumerName, min_idle_time, count, start_id=None):
         """
         关于 xautoclaim的返回值: https://redis.io/commands/xautoclaim/
         长度为3的数组
@@ -102,9 +102,9 @@ class Client:
         if start_id is None:
             start_id = "0-0"
         messages = await self.client.xautoclaim(
-            self.stream_name,
-            group_name,
-            consumer_name,
+            self.streamName,
+            groupName,
+            consumerName,
             min_idle_time,
             count=count,
             start_id=start_id

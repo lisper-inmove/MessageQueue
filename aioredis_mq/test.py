@@ -21,7 +21,7 @@ class Test:
         p.push(message)
 
     def pull(self):
-        consumer = Consumer(client=self.client, from_now_on=False)
+        consumer = Consumer(client=self.client, fromNowOn=False)
         print(consumer.pull(1))
 
 

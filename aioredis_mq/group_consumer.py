@@ -1,31 +1,31 @@
 class GroupConsumer:
 
-    def __init__(self, client, group_name, consumer_name,
-                 from_now_on=None, block=None):
+    def __init__(self, client, groupName, consumerName,
+                 fromNowOn=None, block=None):
         self.client = client
-        self.group_name = group_name
-        self.consumer_name = consumer_name
+        self.groupName = groupName
+        self.consumerName = consumerName
         self.block = block
         if self.block is None:
             self.block = 5
-        self.from_now_on = from_now_on
-        if self.from_now_on is None:
-            self.from_now_on = True
+        self.fromNowOn = fromNowOn
+        if self.fromNowOn is None:
+            self.fromNowOn = True
         self.__set_last_id()
 
     def __set_last_id(self):
-        self.last_id = "0-0"
-        if self.from_now_on:
-            self.last_id = ">"
+        self.lastId = "0-0"
+        if self.fromNowOn:
+            self.lastId = ">"
 
     async def create_group(self):
-        await self.client.xgroup_create(self.group_name)
+        await self.client.xgroup_create(self.groupName)
 
     async def pull(self, count):
         async for message in self.client.xgroupread(
-            self.group_name,
-            self.consumer_name,
-            self.last_id,
+            self.groupName,
+            self.consumerName,
+            self.lastId,
             count,
             self.block
         ):
@@ -33,27 +33,27 @@ class GroupConsumer:
 
     async def pendings(self):
         """当前已经被consumer读取了，但是没有ack的消息"""
-        return await self.client.xpending(self.group_name)
+        return await self.client.xpending(self.groupName)
 
-    async def pending_range(self, count=None, consumer_name=None):
+    async def pending_range(self, count=None, consumerName=None):
         if count is None:
             count = 10
-        if consumer_name is None:
-            consumer_name = self.consumer_name
+        if consumerName is None:
+            consumerName = self.consumerName
         pending_info = await self.pendings()
         if pending_info.get("pending") == 0:
             return
         min_id = pending_info.get("min").decode()
         max_id = pending_info.get("max").decode()
         async for message in self.client.xpending_range(
-                self.group_name, min_id, max_id, count, consumer_name
+                self.groupName, min_id, max_id, count, consumerName
         ):
             yield message
 
     async def claim(self, message_ids, min_idle_time=None):
         if min_idle_time is None:
             min_idle_time = 10 * 1000
-        return await self.client.claim(self.group_name, self.consumer_name, min_idle_time, message_ids)
+        return await self.client.claim(self.groupName, self.consumerName, min_idle_time, message_ids)
 
     async def autoclaim(self, min_idle_time=None, count=None):
         """
@@ -66,7 +66,7 @@ class GroupConsumer:
             min_idle_time = 10 * 1000
         if count is None:
             count = 10
-        return await self.client.autoclaim(self.group_name, self.consumer_name, min_idle_time, count)
+        return await self.client.autoclaim(self.groupName, self.consumerName, min_idle_time, count)
 
     async def ack(self, id):
-        await self.client.xack(self.group_name, id)
+        await self.client.xack(self.groupName, id)

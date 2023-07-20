@@ -1,7 +1,7 @@
 class MsgConfig:
 
-    REDIS = 0x01
-    KAFKA = 0x02
+    REDIS = "REDIS"
+    KAFKA = "KAFKA"
 
     def __init__(self, type):
         self.type = type
@@ -13,3 +13,6 @@ class MsgConfig:
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
+
+    def __str__(self):
+        return str(self.__dict__)
