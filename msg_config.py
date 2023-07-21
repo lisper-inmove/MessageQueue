@@ -2,6 +2,7 @@ class MsgConfig:
 
     REDIS = "REDIS"
     KAFKA = "KAFKA"
+    PULSAR = "PULSAR"
 
     def __init__(self, type):
         self.type = type

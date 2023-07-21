@@ -7,6 +7,7 @@ class Consumer:
     def get_consumer(self, msg_config):
         self.__redis_consumer(msg_config)
         self.__kafka_consumer(msg_config)
+        self.__pulsar_consumer(msg_config)
         return self.consumer
 
     def __redis_consumer(self, config):
@@ -43,4 +44,14 @@ class Consumer:
         port = int(SysEnv.get("KAFKA_PORT"))
         config.bootstrap_servers = f"{host}:{port}"
         from .kafka_mq.consumer import Consumer
+        self.consumer = Consumer(config)
+
+    def __pulsar_consumer(self, config):
+        if config.type != MsgConfig.PULSAR:
+            return
+        host = SysEnv.get("PULSAR_HOST")
+        port = int(SysEnv.get("PULSAR_PORT"))
+        config.streamName = f"{SysEnv.get('PULSAR_TOPIC_PREFIX')}{config.streamName}"
+        config.serverUrl = f"{host}:{port}"
+        from .pulsar_mq.consumer import Consumer
         self.consumer = Consumer(config)

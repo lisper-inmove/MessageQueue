@@ -7,6 +7,7 @@ class Producer:
     def get_producer(self, msg_config):
         self.__redis_producer(msg_config)
         self.__kafka_producer(msg_config)
+        self.__pulsar_producer(msg_config)
         return self.producer
 
     def __redis_producer(self, config):
@@ -39,4 +40,14 @@ class Producer:
         port = int(SysEnv.get("KAFKA_PORT"))
         config.bootstrap_servers = f"{host}:{port}"
         from .kafka_mq.producer import Producer
+        self.producer = Producer(config)
+
+    def __pulsar_producer(self, config):
+        if config.type != MsgConfig.PULSAR:
+            return
+        host = SysEnv.get("PULSAR_HOST")
+        port = int(SysEnv.get("PULSAR_PORT"))
+        config.streamName = f"{SysEnv.get('PULSAR_TOPIC_PREFIX')}{config.streamName}"
+        config.serverUrl = f"{host}:{port}"
+        from .pulsar_mq.producer import Producer
         self.producer = Producer(config)
