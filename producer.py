@@ -15,22 +15,12 @@ class Producer:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
-        if config.isAsync:
-            from redis import asyncio as aioredis
-            from .aioredis_mq.producer import Producer
-            from .aioredis_mq.client import Client
-            client = Client(
-                client=aioredis.StrictRedis(host=host, port=port),
-                streamName=config.streamName
-            )
-        else:
-            import redis
-            from .redis_mq.producer import Producer
-            from .redis_mq.client import Client
-            client = Client(
-                client=redis.StrictRedis(host=host, port=port),
-                streamName=config.streamName
-            )
+        from redis import asyncio as aioredis
+        from .aioredis_mq.producer import Producer
+        from .aioredis_mq.client import Client
+        client = Client(
+            client=aioredis.StrictRedis(host=host, port=port),
+        )
         self.producer = Producer(client, config)
 
     def __kafka_producer(self, config):
@@ -47,7 +37,7 @@ class Producer:
             return
         host = SysEnv.get("PULSAR_HOST")
         port = int(SysEnv.get("PULSAR_PORT"))
-        config.streamName = f"{SysEnv.get('PULSAR_TOPIC_PREFIX')}{config.streamName}"
+        config.topic = f"{SysEnv.get('PULSAR_TOPIC_PREFIX')}{config.topic}"
         config.serverUrl = f"{host}:{port}"
         from .pulsar_mq.producer import Producer
         self.producer = Producer(config)

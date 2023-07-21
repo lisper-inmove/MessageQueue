@@ -33,7 +33,7 @@ class Consumer:
             messages = await self.consumer.getmany(max_records=count)
             for topic, msgs in messages.items():
                 for msg in msgs:
-                    yield msg.value
+                    yield msg
         except Exception as ex:
             logger.traceback(ex)
             pass

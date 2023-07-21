@@ -3,21 +3,20 @@ import redis
 
 class Client:
 
-    def __init__(self, client, streamName, maxlen=None):
-        if maxlen is None:
-            maxlen = 1000
-        self.maxlen = maxlen
+    def __init__(self, client, config):
+        self.config = config
+        if self.config.maxlen is None:
+            self.config.maxlen = 1000
+        if self.config.fromNowOn is None:
+            self.config.fromNowOn = True
         self.client = client
-        # 默认只获取最新数据
-        self.fromNowOn = True
-        self.streamName = streamName
 
     async def xgroup_create(self, groupName, mkstream=None):
         if mkstream is None:
             mkstream = True
         try:
             await self.client.xgroup_create(
-                self.streamName,
+                self.config.topic,
                 groupName,
                 mkstream=mkstream
             )
@@ -28,7 +27,7 @@ class Client:
 
     async def xread(self, count, lastId, block):
         messages = await self.client.xread(
-            streams={self.streamName: lastId},
+            streams={self.config.topic: lastId},
             count=count,
             block=block
         )
@@ -41,7 +40,7 @@ class Client:
         messages = await self.client.xreadgroup(
             groupname=groupName,
             consumername=consumerName,
-            streams={self.streamName: lastId},
+            streams={self.config.topic: lastId},
             count=count,
             block=block
         )
@@ -52,26 +51,26 @@ class Client:
 
     async def xadd(self, data):
         return await self.client.xadd(
-            self.streamName,
+            self.config.topic,
             data,
-            maxlen=self.maxlen,
+            maxlen=self.config.maxlen,
             approximate=True
         )
 
     async def xdel(self, id):
-        await self.client.xdel(self.streamName, id)
+        await self.client.xdel(self.config.topic, id)
 
     async def xack(self, groupName, id):
-        return await self.client.xack(self.streamName, groupName, id)
+        return await self.client.xack(self.config.topic, groupName, id)
 
     async def xpending(self, groupName):
-        return await self.client.xpending(self.streamName, groupName)
+        return await self.client.xpending(self.config.topic, groupName)
 
     async def xpending_range(self, groupName, min_id, max_id, count, consumerName=None, idle=None):
         if idle is None:
             idle = 10 * 1000
         messages = await self.client.xpending_range(
-            self.streamName,
+            self.config.topic,
             groupName,
             min_id,
             max_id,
@@ -84,7 +83,7 @@ class Client:
 
     async def claim(self, groupName, consumerName, min_idle_time, message_ids):
         return await self.client.xclaim(
-            self.streamName,
+            self.config.topic,
             groupName,
             consumerName,
             min_idle_time,
@@ -102,7 +101,7 @@ class Client:
         if start_id is None:
             start_id = "0-0"
         messages = await self.client.xautoclaim(
-            self.streamName,
+            self.config.topic,
             groupName,
             consumerName,
             min_idle_time,

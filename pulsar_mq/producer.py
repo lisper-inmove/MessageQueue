@@ -12,7 +12,7 @@ class Producer:
         self.config = config
         client = pulsar.Client(self.config.serverUrl)
         self.producer = client.create_producer(
-            self.config.streamName,
+            self.config.topic,
             block_if_queue_full=True,
             batching_enabled=True,
             batching_max_publish_delay_ms=10

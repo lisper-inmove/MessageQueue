@@ -13,27 +13,13 @@ class GroupConsumer:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
-        if config.isAsync:
-            from redis import asyncio as aioredis
-            from .aioredis_mq.group_consumer import GroupConsumer
-            from .aioredis_mq.client import Client
-            client = Client(
-                client=aioredis.StrictRedis(host=host, port=port),
-                streamName=config.streamName
-            )
-        else:
-            import redis
-            from .redis_mq.group_consumer import GroupConsumer
-            from .redis_mq.client import Client
-            client = Client(
-                client=redis.StrictRedis(host=host, port=port),
-                streamName=config.streamName
-            )
+        from redis import asyncio as aioredis
+        from .aioredis_mq.group_consumer import GroupConsumer
+        from .aioredis_mq.client import Client
+        client = Client(
+            client=aioredis.StrictRedis(host=host, port=port)
+        )
         self.group_consumer = GroupConsumer(
             client,
             config,
-            #config.groupName,
-            #config.consumerNname,
-            #block=config.block,
-            #fromNowOn=config.fromNowOn
         )
