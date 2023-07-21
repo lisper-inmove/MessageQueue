@@ -1,3 +1,5 @@
+import json
+
 from aiokafka import AIOKafkaProducer
 from submodules.utils.logger import Logger
 
@@ -11,16 +13,22 @@ class Producer:
         self.producer = AIOKafkaProducer(
             bootstrap_servers=config.bootstrap_servers
         )
+        self.isStart = False
 
     async def start(self):
+        if self.isStart:
+            return
         logger.info(f"kafka producer start: {self.config}")
         await self.producer.start()
+        self.isStart = True
 
     async def cleanup(self):
         logger.info(f"kafka producer cleanup: {self.config}")
         await self.producer.stop()
 
-    async def produce(self, message):
+    async def push(self, message):
+        await self.start()
+        message = json.dumps(message).encode()
         await self.producer.send(
             self.config.topic,
             message

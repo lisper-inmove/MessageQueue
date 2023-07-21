@@ -13,18 +13,30 @@ class Consumer:
             bootstrap_servers=config.bootstrap_servers,
             group_id=config.groupName
         )
+        self.isStart = False
 
     async def start(self):
+        if self.isStart:
+            return
         logger.info(f"kafka consumer start {self.config}")
         await self.consumer.start()
+        self.isStart = True
 
     async def cleanup(self):
         logger.info(f"kafka consumer cleanup {self.config}")
         await self.consumer.stop()
 
-    async def consume(self):
-        async for msg in self.consumer:
-            yield msg
+    async def pull(self, count):
+        await self.start()
+
+        try:
+            messages = await self.consumer.getmany(max_records=count)
+            for topic, msgs in messages.items():
+                for msg in msgs:
+                    yield msg.value
+        except Exception as ex:
+            logger.traceback(ex)
+            pass
 
     async def __aenter__(self):
         return self

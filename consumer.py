@@ -33,8 +33,7 @@ class Consumer:
             )
         self.consumer = Consumer(
             client,
-            fromNowOn=config.fromNowOn,
-            block=config.block
+            config,
         )
 
     def __kafka_consumer(self, config):

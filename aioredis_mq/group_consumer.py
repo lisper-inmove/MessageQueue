@@ -1,59 +1,55 @@
 class GroupConsumer:
 
-    def __init__(self, client, groupName, consumerName,
-                 fromNowOn=None, block=None):
+    def __init__(self, client, config):
         self.client = client
-        self.groupName = groupName
-        self.consumerName = consumerName
-        self.block = block
-        if self.block is None:
-            self.block = 5
-        self.fromNowOn = fromNowOn
-        if self.fromNowOn is None:
-            self.fromNowOn = True
+        self.config = config
+        if self.config.block is None:
+            self.config.block = 5
+        if self.config.fromNowOn is None:
+            self.config.fromNowOn = True
         self.__set_last_id()
 
     def __set_last_id(self):
         self.lastId = "0-0"
-        if self.fromNowOn:
+        if self.config.fromNowOn:
             self.lastId = ">"
 
     async def create_group(self):
-        await self.client.xgroup_create(self.groupName)
+        await self.client.xgroup_create(self.config.groupName)
 
     async def pull(self, count):
         async for message in self.client.xgroupread(
-            self.groupName,
-            self.consumerName,
+            self.config.groupName,
+            self.config.consumerName,
             self.lastId,
             count,
-            self.block
+            self.config.block
         ):
             yield message
 
     async def pendings(self):
         """当前已经被consumer读取了，但是没有ack的消息"""
-        return await self.client.xpending(self.groupName)
+        return await self.client.xpending(self.config.groupName)
 
     async def pending_range(self, count=None, consumerName=None):
         if count is None:
             count = 10
         if consumerName is None:
-            consumerName = self.consumerName
+            consumerName = self.config.consumerName
         pending_info = await self.pendings()
         if pending_info.get("pending") == 0:
             return
         min_id = pending_info.get("min").decode()
         max_id = pending_info.get("max").decode()
         async for message in self.client.xpending_range(
-                self.groupName, min_id, max_id, count, consumerName
+                self.config.groupName, min_id, max_id, count, consumerName
         ):
             yield message
 
     async def claim(self, message_ids, min_idle_time=None):
         if min_idle_time is None:
             min_idle_time = 10 * 1000
-        return await self.client.claim(self.groupName, self.consumerName, min_idle_time, message_ids)
+        return await self.client.claim(self.config.groupName, self.config.consumerName, min_idle_time, message_ids)
 
     async def autoclaim(self, min_idle_time=None, count=None):
         """
@@ -66,7 +62,7 @@ class GroupConsumer:
             min_idle_time = 10 * 1000
         if count is None:
             count = 10
-        return await self.client.autoclaim(self.groupName, self.consumerName, min_idle_time, count)
+        return await self.client.autoclaim(self.config.groupName, self.config.consumerName, min_idle_time, count)
 
     async def ack(self, id):
-        await self.client.xack(self.groupName, id)
+        await self.client.xack(self.config.groupName, id)

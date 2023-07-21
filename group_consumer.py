@@ -31,8 +31,9 @@ class GroupConsumer:
             )
         self.group_consumer = GroupConsumer(
             client,
-            config.groupName,
-            config.consumerNname,
-            block=config.block,
-            fromNowOn=config.fromNowOn
+            config,
+            #config.groupName,
+            #config.consumerNname,
+            #block=config.block,
+            #fromNowOn=config.fromNowOn
         )

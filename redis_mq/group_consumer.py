@@ -1,17 +1,12 @@
 class GroupConsumer:
 
-    def __init__(self, client, groupName, consumerName,
-                 fromNowOn=None, block=None):
+    def __init__(self, client, config):
         self.client = client
-        self.groupName = groupName
-        self.consumerName = consumerName
-        self.block = block
-        if self.block is None:
-            self.block = 5
-        self.fromNowOn = fromNowOn
-        if self.fromNowOn is None:
-            self.fromNowOn = True
-        self.client.xgroup_create(groupName)
+        if self.config.block is None:
+            self.config.block = 5
+        if self.config.fromNowOn is None:
+            self.config.fromNowOn = True
+        self.client.xgroup_create(self.config.groupName)
         self.__set_last_id()
 
     def __set_last_id(self):
@@ -21,11 +16,11 @@ class GroupConsumer:
 
     def pull(self, count):
         messages = self.client.xgroupread(
-            self.groupName,
-            self.consumerName,
+            self.config.groupName,
+            self.config.consumerName,
             self.lastId,
             count,
-            self.block
+            self.config.block
         )
         if len(messages) > 0:
             self.lastId = messages[-1][0]
@@ -33,24 +28,24 @@ class GroupConsumer:
 
     def pendings(self):
         """当前已经被consumer读取了，但是没有ack的消息"""
-        return self.client.xpending(self.groupName)
+        return self.client.xpending(self.config.groupName)
 
     def pending_range(self, count=None, consumerName=None):
         if count is None:
             count = 10
         if consumerName is None:
-            consumerName = self.consumerName
+            consumerName = self.config.consumerName
         pending_info = self.pendings()
         if pending_info.get("pending") == 0:
             return []
-        min_id = pending_info.get("min").decode()
-        max_id = pending_info.get("max").decode()
-        return self.client.xpending_range(self.groupName, min_id, max_id, count, consumerName)
+        minId = pending_info.get("min").decode()
+        maxId = pending_info.get("max").decode()
+        return self.client.xpending_range(self.config.groupName, minId, maxId, count, consumerName)
 
     def claim(self, message_ids, min_idle_time=None):
         if min_idle_time is None:
             min_idle_time = 10 * 1000
-        return self.client.claim(self.groupName, self.consumerName, min_idle_time, message_ids)
+        return self.client.claim(self.config.groupName, self.config.consumerName, min_idle_time, message_ids)
 
     def autoclaim(self, min_idle_time=None, count=None):
         """
@@ -63,7 +58,7 @@ class GroupConsumer:
             min_idle_time = 10 * 1000
         if count is None:
             count = 10
-        return self.client.autoclaim(self.groupName, self.consumerName, min_idle_time, count)
+        return self.client.autoclaim(self.config.groupName, self.config.consumerName, min_idle_time, count)
 
     def ack(self, id):
-        self.client.xack(self.groupName, id)
+        self.client.xack(self.config.groupName, id)

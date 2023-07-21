@@ -30,7 +30,7 @@ class Producer:
                 client=redis.StrictRedis(host=host, port=port),
                 streamName=config.streamName
             )
-        self.producer = Producer(client)
+        self.producer = Producer(client, config)
 
     def __kafka_producer(self, config):
         if config.type != MsgConfig.KAFKA:
