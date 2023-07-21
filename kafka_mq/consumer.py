@@ -1,5 +1,6 @@
 from aiokafka import AIOKafkaConsumer
 from submodules.utils.logger import Logger
+from ..message import Message
 
 logger = Logger()
 
@@ -28,12 +29,14 @@ class Consumer:
 
     async def pull(self, count):
         await self.start()
-
         try:
             messages = await self.consumer.getmany(max_records=count)
             for topic, msgs in messages.items():
                 for msg in msgs:
-                    yield msg
+                    yield Message(
+                        topic=topic,
+                        value=msg
+                    )
         except Exception as ex:
             logger.traceback(ex)
             pass
@@ -43,3 +46,7 @@ class Consumer:
 
     async def __aexit__(self, *args):
         await self.cleanup()
+
+    async def ack(self, message):
+        logger.info(f"kafka ack: {message}")
+        await self.consumer.commit({self.topic: message.value.offset + 1})

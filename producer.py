@@ -1,17 +1,17 @@
-from .msg_config import MsgConfig
+from .mq_config import MQConfig
 from submodules.utils.sys_env import SysEnv
 
 
 class Producer:
 
-    def get_producer(self, msg_config):
-        self.__redis_producer(msg_config)
-        self.__kafka_producer(msg_config)
-        self.__pulsar_producer(msg_config)
+    def get_producer(self, config):
+        self.__redis_producer(config)
+        self.__kafka_producer(config)
+        self.__pulsar_producer(config)
         return self.producer
 
     def __redis_producer(self, config):
-        if config.type != MsgConfig.REDIS:
+        if config.type != MQConfig.REDIS:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
@@ -24,7 +24,7 @@ class Producer:
         self.producer = Producer(client, config)
 
     def __kafka_producer(self, config):
-        if config.type != MsgConfig.KAFKA:
+        if config.type != MQConfig.KAFKA:
             return
         host = SysEnv.get("KAFKA_HOST")
         port = int(SysEnv.get("KAFKA_PORT"))
@@ -33,7 +33,7 @@ class Producer:
         self.producer = Producer(config)
 
     def __pulsar_producer(self, config):
-        if config.type != MsgConfig.PULSAR:
+        if config.type != MQConfig.PULSAR:
             return
         host = SysEnv.get("PULSAR_HOST")
         port = int(SysEnv.get("PULSAR_PORT"))

@@ -1,4 +1,5 @@
 from datetime import datetime
+from ..message import Message
 
 
 class Consumer:
@@ -18,6 +19,11 @@ class Consumer:
             self.lastId = f"{int(datetime.now().timestamp() * 1000)}-0"
 
     async def pull(self, count):
-        async for message in self.client.xread(count, self.lastId, self.config.block):
+        async for message in self.client.xread(
+                count,
+                self.lastId,
+                self.config.block):
             self.lastId = message[0]
-            yield message
+            yield Message(
+                value=message
+            )

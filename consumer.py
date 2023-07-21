@@ -1,17 +1,17 @@
-from .msg_config import MsgConfig
+from .mq_config import MQConfig
 from submodules.utils.sys_env import SysEnv
 
 
 class Consumer:
 
-    def get_consumer(self, msg_config):
-        self.__redis_consumer(msg_config)
-        self.__kafka_consumer(msg_config)
-        self.__pulsar_consumer(msg_config)
+    def get_consumer(self, config):
+        self.__redis_consumer(config)
+        self.__kafka_consumer(config)
+        self.__pulsar_consumer(config)
         return self.consumer
 
     def __redis_consumer(self, config):
-        if config.type != MsgConfig.REDIS:
+        if config.type != MQConfig.REDIS:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
@@ -27,7 +27,7 @@ class Consumer:
         )
 
     def __kafka_consumer(self, config):
-        if config.type != MsgConfig.KAFKA:
+        if config.type != MQConfig.KAFKA:
             return
         host = SysEnv.get("KAFKA_HOST")
         port = int(SysEnv.get("KAFKA_PORT"))
@@ -36,7 +36,7 @@ class Consumer:
         self.consumer = Consumer(config)
 
     def __pulsar_consumer(self, config):
-        if config.type != MsgConfig.PULSAR:
+        if config.type != MQConfig.PULSAR:
             return
         host = SysEnv.get("PULSAR_HOST")
         port = int(SysEnv.get("PULSAR_PORT"))

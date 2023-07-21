@@ -1,15 +1,15 @@
-from .msg_config import MsgConfig
+from .mq_config import MQConfig
 from submodules.utils.sys_env import SysEnv
 
 
 class GroupConsumer:
 
-    def get_group_consumer(self, msg_config):
-        self.__redis_group_consumer(msg_config)
+    def get_group_consumer(self, config):
+        self.__redis_group_consumer(config)
         return self.group_consumer
 
     def __redis_group_consumer(self, config):
-        if config.type != MsgConfig.REDIS:
+        if config.type != MQConfig.REDIS:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
