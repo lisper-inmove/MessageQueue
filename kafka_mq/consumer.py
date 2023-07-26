@@ -1,4 +1,5 @@
 from aiokafka import AIOKafkaConsumer
+from aiokafka import TopicPartition
 from submodules.utils.logger import Logger
 from ..message import Message
 
@@ -49,4 +50,8 @@ class Consumer:
 
     async def ack(self, message):
         logger.info(f"kafka ack: {message}")
-        await self.consumer.commit({self.topic: message.value.offset + 1})
+        topic = TopicPartition(
+            self.config.topic,
+            message.value.partition
+        )
+        await self.consumer.commit({topic: message.value.offset + 1})

@@ -1,3 +1,6 @@
+from ..message import Message
+
+
 class GroupConsumer:
 
     def __init__(self, client, config):
@@ -25,7 +28,7 @@ class GroupConsumer:
             count,
             self.config.block
         ):
-            yield message
+            yield Message(value=message)
 
     async def pendings(self):
         """当前已经被consumer读取了，但是没有ack的消息"""
@@ -64,5 +67,7 @@ class GroupConsumer:
             count = 10
         return await self.client.autoclaim(self.config.groupName, self.config.consumerName, min_idle_time, count)
 
-    async def ack(self, id):
+    async def ack(self, message):
+        value = message.value
+        id = value[0].decode()
         await self.client.xack(self.config.groupName, id)

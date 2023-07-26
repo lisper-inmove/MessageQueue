@@ -27,3 +27,6 @@ class Consumer:
             yield Message(
                 value=message
             )
+
+    async def ack(self, msg):
+        pass

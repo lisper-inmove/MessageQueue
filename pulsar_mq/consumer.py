@@ -20,7 +20,7 @@ class Consumer:
         client = await aiopulsar.connect(self.config.serverUrl)
         self.consumer = await client.subscribe(
             topic=self.config.topic,
-            subscription_name=self.config.topic,
+            subscription_name=f'{self.config.consumerName}-sn',
             consumer_name=self.config.consumerName,
             initial_position=pulsar.InitialPosition.Earliest,
             negative_ack_redelivery_delay_ms=10000,
@@ -41,4 +41,7 @@ class Consumer:
 
     async def ack(self, msg):
         logger.info(f"pulsar ack: {msg}")
-        await self.consumer.acknowledge(msg)
+        await self.consumer.acknowledge(msg.value)
+
+    async def cleanup(self):
+        pass

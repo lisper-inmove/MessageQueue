@@ -20,6 +20,7 @@ class Consumer:
         from .aioredis_mq.client import Client
         client = Client(
             client=aioredis.StrictRedis(host=host, port=port),
+            config=config,
         )
         self.consumer = Consumer(
             client,

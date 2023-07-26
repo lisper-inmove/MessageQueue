@@ -17,7 +17,8 @@ class GroupConsumer:
         from .aioredis_mq.group_consumer import GroupConsumer
         from .aioredis_mq.client import Client
         client = Client(
-            client=aioredis.StrictRedis(host=host, port=port)
+            client=aioredis.StrictRedis(host=host, port=port),
+            config=config
         )
         self.group_consumer = GroupConsumer(
             client,
