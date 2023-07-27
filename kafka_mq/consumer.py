@@ -1,5 +1,6 @@
 from aiokafka import AIOKafkaConsumer
 from aiokafka import TopicPartition
+from kafka.errors import CommitFailedError
 from submodules.utils.logger import Logger
 from ..message import Message
 
@@ -13,7 +14,9 @@ class Consumer:
         self.consumer = AIOKafkaConsumer(
             self.config.topic,
             bootstrap_servers=config.bootstrap_servers,
-            group_id=config.groupName
+            group_id=config.groupName,
+            # session_timeout_ms=60000,
+            # heartbeat_interval_ms=20000
         )
         self.isStart = False
 
@@ -49,9 +52,12 @@ class Consumer:
         await self.cleanup()
 
     async def ack(self, message):
-        logger.info(f"kafka ack: {message}")
+        logger.info(f"kafka ack: {message.value}")
         topic = TopicPartition(
             self.config.topic,
             message.value.partition
         )
-        await self.consumer.commit({topic: message.value.offset + 1})
+        try:
+            await self.consumer.commit({topic: message.value.offset + 1})
+        except CommitFailedError as ex:
+            logger.warning(f"{message.value} -- {ex}")

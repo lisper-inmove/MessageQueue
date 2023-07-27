@@ -1,4 +1,7 @@
 from ..message import Message
+from submodules.utils.logger import Logger
+
+logger = Logger()
 
 
 class GroupConsumer:
@@ -52,7 +55,12 @@ class GroupConsumer:
     async def claim(self, message_ids, min_idle_time=None):
         if min_idle_time is None:
             min_idle_time = 10 * 1000
-        return await self.client.claim(self.config.groupName, self.config.consumerName, min_idle_time, message_ids)
+        return await self.client.claim(
+            self.config.groupName,
+            self.config.consumerName,
+            min_idle_time,
+            message_ids
+        )
 
     async def autoclaim(self, min_idle_time=None, count=None):
         """
@@ -65,9 +73,15 @@ class GroupConsumer:
             min_idle_time = 10 * 1000
         if count is None:
             count = 10
-        return await self.client.autoclaim(self.config.groupName, self.config.consumerName, min_idle_time, count)
+        return await self.client.autoclaim(
+            self.config.groupName,
+            self.config.consumerName,
+            min_idle_time,
+            count
+        )
 
     async def ack(self, message):
         value = message.value
         id = value[0].decode()
+        logger.info(f"Redis GroupConsumer {self.config.groupName} {self.config.consumerName} ack {value}")
         await self.client.xack(self.config.groupName, id)

@@ -16,13 +16,13 @@ class Consumer:
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
         from redis import asyncio as aioredis
-        from .aioredis_mq.consumer import Consumer
+        from .aioredis_mq.group_consumer import GroupConsumer
         from .aioredis_mq.client import Client
         client = Client(
             client=aioredis.StrictRedis(host=host, port=port),
             config=config,
         )
-        self.consumer = Consumer(
+        self.consumer = GroupConsumer(
             client,
             config,
         )
