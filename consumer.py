@@ -4,13 +4,13 @@ from submodules.utils.sys_env import SysEnv
 
 class Consumer:
 
-    def get_consumer(self, config):
-        self.__redis_consumer(config)
-        self.__kafka_consumer(config)
-        self.__pulsar_consumer(config)
+    async def get_consumer(self, config):
+        await self.__redis_consumer(config)
+        await self.__kafka_consumer(config)
+        await self.__pulsar_consumer(config)
         return self.consumer
 
-    def __redis_consumer(self, config):
+    async def __redis_consumer(self, config):
         if config.type != MQConfig.REDIS:
             return
         host = SysEnv.get("REDIS_HOST")
@@ -19,15 +19,16 @@ class Consumer:
         from .aioredis_mq.group_consumer import GroupConsumer
         from .aioredis_mq.client import Client
         client = Client(
-            client=aioredis.StrictRedis(host=host, port=port),
+            client=await aioredis.StrictRedis(host=host, port=port),
             config=config,
         )
         self.consumer = GroupConsumer(
             client,
             config,
         )
+        await self.consumer.create_group()
 
-    def __kafka_consumer(self, config):
+    async def __kafka_consumer(self, config):
         if config.type != MQConfig.KAFKA:
             return
         host = SysEnv.get("KAFKA_HOST")
@@ -35,8 +36,9 @@ class Consumer:
         config.bootstrap_servers = f"{host}:{port}"
         from .kafka_mq.consumer import Consumer
         self.consumer = Consumer(config)
+        await self.consumer.start()
 
-    def __pulsar_consumer(self, config):
+    async def __pulsar_consumer(self, config):
         if config.type != MQConfig.PULSAR:
             return
         host = SysEnv.get("PULSAR_HOST")
@@ -45,3 +47,4 @@ class Consumer:
         config.serverUrl = f"{host}:{port}"
         from .pulsar_mq.consumer import Consumer
         self.consumer = Consumer(config)
+        await self.consumer.start()

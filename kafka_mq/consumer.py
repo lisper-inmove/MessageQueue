@@ -11,18 +11,18 @@ class Consumer:
 
     def __init__(self, config):
         self.config = config
-        self.consumer = AIOKafkaConsumer(
-            self.config.topic,
-            bootstrap_servers=config.bootstrap_servers,
-            group_id=config.groupName,
-            # session_timeout_ms=60000,
-            # heartbeat_interval_ms=20000
-        )
         self.isStart = False
 
     async def start(self):
         if self.isStart:
             return
+        self.consumer = AIOKafkaConsumer(
+            self.config.topic,
+            bootstrap_servers=self.config.bootstrap_servers,
+            group_id=self.config.groupName,
+            # session_timeout_ms=60000,
+            # heartbeat_interval_ms=20000
+        )
         logger.info(f"kafka consumer start {self.config}")
         await self.consumer.start()
         self.isStart = True

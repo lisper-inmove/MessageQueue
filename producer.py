@@ -4,13 +4,13 @@ from submodules.utils.sys_env import SysEnv
 
 class Producer:
 
-    def get_producer(self, config):
-        self.__redis_producer(config)
-        self.__kafka_producer(config)
-        self.__pulsar_producer(config)
+    async def get_producer(self, config):
+        await self.__redis_producer(config)
+        await self.__kafka_producer(config)
+        await self.__pulsar_producer(config)
         return self.producer
 
-    def __redis_producer(self, config):
+    async def __redis_producer(self, config):
         if config.type != MQConfig.REDIS:
             return
         host = SysEnv.get("REDIS_HOST")
@@ -19,12 +19,12 @@ class Producer:
         from .aioredis_mq.producer import Producer
         from .aioredis_mq.client import Client
         client = Client(
-            client=aioredis.StrictRedis(host=host, port=port),
+            client=await aioredis.StrictRedis(host=host, port=port),
             config=config
         )
         self.producer = Producer(client, config)
 
-    def __kafka_producer(self, config):
+    async def __kafka_producer(self, config):
         if config.type != MQConfig.KAFKA:
             return
         host = SysEnv.get("KAFKA_HOST")
@@ -32,8 +32,9 @@ class Producer:
         config.bootstrap_servers = f"{host}:{port}"
         from .kafka_mq.producer import Producer
         self.producer = Producer(config)
+        await self.producer.start()
 
-    def __pulsar_producer(self, config):
+    async def __pulsar_producer(self, config):
         if config.type != MQConfig.PULSAR:
             return
         host = SysEnv.get("PULSAR_HOST")

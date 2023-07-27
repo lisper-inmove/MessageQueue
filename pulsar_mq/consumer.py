@@ -29,7 +29,6 @@ class Consumer:
         self.isStart = True
 
     async def pull(self, count):
-        await self.start()
         try:
             msg = await self.consumer.receive(timeout_millis=1000)
             yield Message(

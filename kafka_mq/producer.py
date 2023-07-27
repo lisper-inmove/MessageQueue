@@ -10,14 +10,14 @@ class Producer:
 
     def __init__(self, config):
         self.config = config
-        self.producer = AIOKafkaProducer(
-            bootstrap_servers=config.bootstrap_servers
-        )
         self.isStart = False
 
     async def start(self):
         if self.isStart:
             return
+        self.producer = AIOKafkaProducer(
+            bootstrap_servers=self.config.bootstrap_servers
+        )
         logger.info(f"kafka producer start: {self.config}")
         await self.producer.start()
         self.isStart = True
