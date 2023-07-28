@@ -108,5 +108,5 @@ class Client:
             count=count,
             start_id=start_id
         )
-        for message in messages:
+        for message in messages[1]:
             yield message

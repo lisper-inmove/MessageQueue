@@ -1,8 +1,10 @@
 from aiokafka import AIOKafkaConsumer
 from aiokafka import TopicPartition
 from kafka.errors import CommitFailedError
+from kafka import TopicPartition
 from submodules.utils.logger import Logger
 from ..message import Message
+from .helpr import Helper
 
 logger = Logger()
 
@@ -61,3 +63,6 @@ class Consumer:
             await self.consumer.commit({topic: message.value.offset + 1})
         except CommitFailedError as ex:
             logger.warning(f"{message.value} -- {ex}")
+
+    async def autoclaim(self):
+        yield None

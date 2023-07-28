@@ -2,6 +2,7 @@ import json
 
 from aiokafka import AIOKafkaProducer
 from submodules.utils.logger import Logger
+from .helpr import Helper
 
 logger = Logger()
 
@@ -28,10 +29,15 @@ class Producer:
 
     async def push(self, message):
         await self.start()
+        partition = Helper().partitioner(
+            message.get('id'),
+            self.config.maxPartition
+        )
         message = json.dumps(message).encode()
         await self.producer.send(
             self.config.topic,
-            message
+            message,
+            partition=partition
         )
 
     async def __aenter__(self):

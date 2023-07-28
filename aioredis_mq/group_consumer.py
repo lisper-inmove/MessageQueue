@@ -31,6 +31,7 @@ class GroupConsumer:
             count,
             self.config.block
         ):
+            print(f"pull >>>>>>>>>>>> : {message}")
             yield Message(value=message)
 
     async def pendings(self):
@@ -73,12 +74,13 @@ class GroupConsumer:
             min_idle_time = 10 * 1000
         if count is None:
             count = 10
-        return await self.client.autoclaim(
+        async for message in self.client.autoclaim(
             self.config.groupName,
             self.config.consumerName,
             min_idle_time,
             count
-        )
+        ):
+            yield Message(value=message)
 
     async def ack(self, message):
         value = message.value
