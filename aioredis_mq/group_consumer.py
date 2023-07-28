@@ -31,7 +31,6 @@ class GroupConsumer:
             count,
             self.config.block
         ):
-            print(f"pull >>>>>>>>>>>> : {message}")
             yield Message(value=message)
 
     async def pendings(self):
