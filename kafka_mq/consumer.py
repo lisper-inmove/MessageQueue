@@ -4,7 +4,6 @@ from kafka.errors import CommitFailedError
 from kafka import TopicPartition
 from submodules.utils.logger import Logger
 from ..message import Message
-from .helpr import Helper
 
 logger = Logger()
 
@@ -64,5 +63,5 @@ class Consumer:
         except CommitFailedError as ex:
             logger.warning(f"{message.value} -- {ex}")
 
-    async def autoclaim(self):
+    async def autoclaim(self, *args, **kargs):
         yield None

@@ -39,11 +39,11 @@ class Consumer:
             yield None
 
     async def ack(self, msg):
-        logger.info(f"pulsar ack: {msg}")
+        logger.info(f"pulsar ack: {msg.value}")
         await self.consumer.acknowledge(msg.value)
 
     async def cleanup(self):
         pass
 
-    async def autoclaim(self):
+    async def autoclaim(self, *args, **kargs):
         yield None

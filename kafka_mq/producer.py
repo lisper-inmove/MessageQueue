@@ -33,6 +33,7 @@ class Producer:
             message.get('id'),
             self.config.maxPartition
         )
+        logger.info(f"kafka push {message.get('id')} to {partition}")
         message = json.dumps(message).encode()
         await self.producer.send(
             self.config.topic,
