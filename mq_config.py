@@ -1,6 +1,7 @@
 class MQConfig:
 
     REDIS = "REDIS"
+    REDIS_CLUSTER = "REDIS_CLUSTER"
     KAFKA = "KAFKA"
     PULSAR = "PULSAR"
 
