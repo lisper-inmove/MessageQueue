@@ -37,17 +37,15 @@ class Consumer:
         from .aioredis_mq.group_consumer import GroupConsumer
         from .aioredis_mq.redis_cluster import AredisCluster
         from .aioredis_mq.client import Client
+        startup_nodes_config = SysEnv.get("REDIS_STARTUP_NODES").split(":")
+        start_up_nodes = []
+        for config in startup_nodes_config:
+            config = config.split(",")
+            start_up_nodes.append((config[0], config[1]))
         obj = AredisCluster(
             host=host,
             port=port,
-            startup_nodes=[
-                ("redis1", 7001),
-                ("redis2", 7002),
-                ("redis3", 7003),
-                ("redis4", 7004),
-                ("redis5", 7005),
-                ("redis6", 7006),
-            ]
+            startup_nodes=start_up_nodes
         )
         await obj.connect()
         client = Client(obj, config)
