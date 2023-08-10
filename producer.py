@@ -1,5 +1,8 @@
 from .mq_config import MQConfig
 from submodules.utils.sys_env import SysEnv
+from submodules.utils.logger import Logger
+
+logger = Logger()
 
 
 class Producer:
@@ -30,20 +33,21 @@ class Producer:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
+        password = SysEnv.get("REDIS_CLUSTER_PASSWORD")
         from .aioredis_mq.producer import Producer
         from .aioredis_mq.redis_cluster import AredisCluster
         from .aioredis_mq.client import Client
         startup_nodes_config = SysEnv.get("REDIS_STARTUP_NODES").split(":")
-        start_up_nodes = []
-        for config in startup_nodes_config:
-            config = config.split(",")
-            start_up_nodes.append((config[0], config[1]))
+        startup_nodes = []
+        for startup_node in startup_nodes_config:
+            startup_node = startup_node.split(",")
+            startup_nodes.append((startup_node[0], startup_node[1]))
         obj = AredisCluster(
             host=host,
             port=port,
-            startup_nodes=start_up_nodes,
+            password=password,
+            startup_nodes=startup_nodes,
         )
-
         await obj.connect()
         client = Client(obj, config)
         self.producer = Producer(client, config)

@@ -1,3 +1,5 @@
+import base64
+
 from .mq_config import MQConfig
 from submodules.utils.sys_env import SysEnv
 
@@ -34,6 +36,7 @@ class Consumer:
             return
         host = SysEnv.get("REDIS_HOST")
         port = int(SysEnv.get("REDIS_PORT"))
+        password = SysEnv.get("REDIS_CLUSTER_PASSWORD")
         from .aioredis_mq.group_consumer import GroupConsumer
         from .aioredis_mq.redis_cluster import AredisCluster
         from .aioredis_mq.client import Client
@@ -45,6 +48,7 @@ class Consumer:
         obj = AredisCluster(
             host=host,
             port=port,
+            password=password,
             startup_nodes=start_up_nodes
         )
         await obj.connect()

@@ -47,9 +47,10 @@ ResponseT = Union[Awaitable, Any]
 
 class AredisCluster:
 
-    def __init__(self, host, port, startup_nodes=[]):
+    def __init__(self, host, port, password, startup_nodes=[]):
         self.host = host
         self.port = port
+        self.password = password
         self.__init_startup_nodes(startup_nodes)
         self.loop = asyncio.get_running_loop()
 
@@ -57,13 +58,13 @@ class AredisCluster:
         self.startup_nodes = []
         for host, port in startup_nodes:
             self.startup_nodes.append(
-                ClusterNode(host, port)
+                ClusterNode(host, int(port))
             )
 
     def __connect(self):
-        self.client = RedisCluster(
-            host=self.host,
-            port=self.port,
+        url = f"redis://default:{self.password}@{self.host}:{self.port}/0"
+        self.client = RedisCluster.from_url(
+            url,
             startup_nodes=self.startup_nodes
         )
 
